@@ -265,10 +265,17 @@ def main():
                 page.screenshot(path=screenshot, full_page=True)
                 send_tg_photo(f"🎉 已执行续订。\n⏱️ 当前面板显示状态: {expire_time_text}", screenshot)
             else:
-                screenshot = "renew_error.png"
+                screenshot = "renew_not_available.png"
                 page.screenshot(path=screenshot, full_page=True)
-                send_tg_photo("❌ 未检测到续订按键 (也未找到暂不可续订提示)。", screenshot)
-                sys.exit(1)
+                if expire_time_text and expire_time_text != "未知":
+                    print("⏰ 已抓到剩余时间但未检测到续订按键，判断为未到续订窗口，正常结束。")
+                    send_tg_photo(
+                        f"⏰ 暂未到续订窗口，页面未显示续订按键。\n⏱️ 当前状态: {expire_time_text}",
+                        screenshot,
+                    )
+                else:
+                    send_tg_photo("❌ 未检测到续订按键，且未能抓到剩余时间。", screenshot)
+                    sys.exit(1)
         except Exception as exc:
             print(f"❌ 运行报错: {exc}")
             screenshot = "error.png"
